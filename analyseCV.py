@@ -1,9 +1,7 @@
-# Analyse de CV - GFSI avec jauges et extraction JSON robuste
-
+# Analyse de CV GFSI avec jauges et JSON tolérant
 import streamlit as st
 import PyPDF2
 import json
-import re
 from datetime import datetime
 from pathlib import Path
 import groq
@@ -32,18 +30,17 @@ def afficher_jauge(titre, valeur):
     st.plotly_chart(fig, use_container_width=True)
 
 def extract_valid_json(text):
-    try:
-        # Trouve tous les objets JSON indépendants
-        matches = re.findall(r'\{(?:[^{}]|(?R))*\}', text, re.DOTALL)
-        for m in matches:
-            try:
-                return json.loads(m)
-            except json.JSONDecodeError:
-                continue
-    except Exception as e:
-        st.error(f"Erreur d'extraction JSON : {e}")
+    decoder = json.JSONDecoder()
+    text = text.strip()
+    for i in range(len(text)):
+        try:
+            obj, _ = decoder.raw_decode(text[i:])
+            return obj
+        except json.JSONDecodeError:
+            continue
     return None
 
+# Sidebar config
 with st.sidebar:
     st.header("🔧 Configuration")
     api_key = st.text_input("🔑 Clé API Groq :", type="password")
@@ -75,6 +72,7 @@ with st.sidebar:
         "llama3-8b-8192", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "kmi-k2-70b", "qwen3-72b"
     ])
 
+# Fichiers PDF
 uploaded_files = st.file_uploader("📄 Chargez un ou plusieurs CV (PDF uniquement)", type=["pdf"], accept_multiple_files=True)
 
 if uploaded_files and st.button("🔍 Lancer l'analyse IA"):
@@ -151,9 +149,9 @@ Répond UNIQUEMENT avec un objet JSON strictement valide :
             except Exception as e:
                 st.error(f"❌ Erreur pour {uploaded_file.name} : {e}")
 
-    # Résultats
+    # Affichage des résultats
     for result in results_all:
-        st.subheader(f"📄 Résultats pour {result['nom']}")
+        st.subheader(f"📄 Résultats pour : {result['nom']}")
         df = pd.DataFrame(result["details"])
 
         st.markdown("### 🎯 Taux de conformité par exigence")
