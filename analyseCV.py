@@ -4,6 +4,7 @@
 import streamlit as st
 import PyPDF2
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 import groq
@@ -103,7 +104,12 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
                 st.code(result, language="text")
 
                 try:
-                    result_data = json.loads(result)
+                    # Nettoyage du résultat si présence de texte parasite
+                    json_start = result.find('{')
+                    json_str = result[json_start:]
+                    json_str = re.sub(r'```json|```', '', json_str).strip()
+                    result_data = json.loads(json_str)
+
                     analysis = result_data.get("analysis", [])
 
                     # Compter les statuts et moyenne confiance
@@ -164,8 +170,8 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
                         st.markdown("### 🗒️ Synthèse complémentaire IA")
                         st.info(synthese)
 
-                except json.JSONDecodeError:
-                    st.error("❌ Erreur : la réponse n'est pas un JSON valide. Copie brute ci-dessus.")
+                except Exception as parse_error:
+                    st.error(f"❌ Erreur de parsing JSON : {parse_error}")
 
             except Exception as e:
                 st.error(f"Erreur pendant l'analyse IA : {e}")
