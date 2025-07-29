@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version complète avec options avancées)
+# Analyse de CV - GFSI (version complète avec présentation simplifiée)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -59,23 +59,20 @@ if uploaded_file:
         st.error(f"Erreur lors de la lecture du fichier : {e}")
         st.stop()
 
-    # Options d'affichage avancées
-    debug = st.checkbox("Afficher les données brutes (debug)")
-
     # Construction du prompt
     prompt = f"""
-Tu es un expert en recrutement GFSI.
-Analyse ce CV à la lumière du référentiel suivant :
+Tu es un expert GFSI. Analyse le CV ci-dessous selon ce référentiel :
 
 {json.dumps(selected_ref, indent=2)}
 
-Voici le contenu du CV :
+Contenu du CV :
 {cv_text}
 
-Retourne un JSON structuré avec :
-1. Pour chaque exigence : conforme / non conforme / partiellement conforme, score de confiance, justification
-2. Une synthèse globale du profil
-3. Des recommandations ou relances éventuelles
+Donne une réponse SIMPLIFIÉE, CLAIRE pour un non-spécialiste, en français. Organise par catégorie avec :
+- ✅ Points forts (conformes),
+- ⚠️ Points à challenger,
+- ❌ Points non conformes
+Ajoute des couleurs et un résumé final pour échanger avec le candidat.
 """
 
     if st.button("🔍 Lancer l'analyse IA"):
@@ -87,41 +84,13 @@ Retourne un JSON structuré avec :
                 )
                 result = response.choices[0].message.content.strip()
                 st.success("✅ Analyse terminée")
-                st.subheader("📊 Résultats JSON")
-                st.code(result, language="json")
 
-                try:
-                    parsed_result = json.loads(result)
-                except json.JSONDecodeError:
-                    st.error("Le résultat de l'IA n'est pas un JSON valide.")
-                    st.stop()
+                # Présentation simplifiée pour utilisateurs non experts
+                st.markdown("## ✨ Résultat de l'analyse simplifiée")
+                st.markdown(result, unsafe_allow_html=True)
 
-                # Curseurs interactifs par chapitre
-                chapters = {
-                    "General Requirements": 0,
-                    "Qualifications": 0,
-                    "Advanced Requirements": 0
-                }
-                st.markdown("### 📈 Visualisation par chapitre")
-                for chapter in chapters:
-                    compliant = partial = non_compliant = 0
-                    for item in parsed_result.get("analysis", {}).get(chapter.lower().replace(" ", "_"), []):
-                        status = item.get("status", "").upper()
-                        if status == "CONFORME":
-                            compliant += 1
-                        elif status == "PARTIELLEMENT CONFORME":
-                            partial += 1
-                        elif status == "NON CONFORME":
-                            non_compliant += 1
-                    total = compliant + partial + non_compliant
-                    if total > 0:
-                        st.markdown(f"#### {chapter}")
-                        st.slider("✅ Conformes", 0, total, compliant, disabled=True)
-                        st.slider("🟡 À challenger", 0, total, partial, disabled=True)
-                        st.slider("❌ Non conformes", 0, total, non_compliant, disabled=True)
-
-                filename = f"analyse_{ref_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-                st.download_button("💾 Télécharger le rapport JSON", result, file_name=filename, mime="application/json")
+                filename = f"analyse_{ref_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+                st.download_button("💾 Télécharger le rapport simplifié", result, file_name=filename, mime="text/plain")
 
             except Exception as e:
                 st.error(f"Erreur pendant l'analyse IA : {e}")
@@ -129,7 +98,7 @@ Retourne un JSON structuré avec :
 # Administration (mode développeur)
 with st.expander("🔐 Mode administration - Création de référentiels IA"):
     admin_pwd = st.text_input("Mot de passe admin :", type="password")
-    if admin_pwd == "admin123":  # à sécuriser dans la vraie vie
+    if admin_pwd == "admin123":
         texte = st.text_area("📋 Collez ici les exigences du nouveau référentiel :")
         if st.button("🤖 Générer référentiel JSON"):
             prompt_ref = f"Crée un JSON structuré pour ce référentiel GFSI :\n{texte}"
