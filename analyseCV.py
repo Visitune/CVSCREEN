@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version avec visualisation par camembert sans matplotlib)
+# Analyse de CV - GFSI (version avec vérification JSON et affichage brut)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -60,7 +60,7 @@ if uploaded_file:
         st.error(f"Erreur lors de la lecture du fichier : {e}")
         st.stop()
 
-    # Construction du prompt avec comparaison point par point
+    # Construction du prompt avec instruction stricte
     prompt = f"""
 Tu es un expert en conformité IFS.
 Analyse le CV ci-dessous en comparant CHAQUE EXIGENCE du référentiel IFS une par une.
@@ -75,11 +75,11 @@ RÉFÉRENTIEL IFS :
 CV DU CANDIDAT :
 {cv_text}
 
-Format attendu :
+Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte avant ou après, au format suivant :
 {{
   "analysis": [
     {{
-      "exigence": "texte exigence...",
+      "exigence": "...",
       "statut": "CONFORME / À CHALLENGER / NON CONFORME",
       "justification": "...",
       "confiance": 0.85
@@ -99,6 +99,9 @@ Format attendu :
                 result = response.choices[0].message.content.strip()
                 st.success("✅ Analyse terminée")
 
+                st.markdown("### 🧾 Aperçu brut du résultat IA")
+                st.code(result, language="text")
+
                 try:
                     result_data = json.loads(result)
                     analysis = result_data.get("analysis", [])
@@ -109,21 +112,9 @@ Format attendu :
                     non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
 
                     st.markdown("## 📊 Répartition des statuts")
-                    data = pd.DataFrame({
+                    st.bar_chart({
                         "Statut": ["✅ Conformes", "⚠️ À challenger", "❌ Non conformes"],
-                        "Valeur": [conformes, challengers, non_conformes]
-                    })
-                    st.plotly_chart({
-                        "data": [
-                            {
-                                "values": data["Valeur"].tolist(),
-                                "labels": data["Statut"].tolist(),
-                                "type": "pie",
-                                "marker": {"colors": ["#28a745", "#ffc107", "#dc3545"]},
-                                "textinfo": "label+percent"
-                            }
-                        ],
-                        "layout": {"title": "Analyse visuelle des exigences"}
+                        "Nombre": [conformes, challengers, non_conformes]
                     })
 
                     st.markdown("## 📋 Détail par exigence")
@@ -150,8 +141,7 @@ Format attendu :
                     st.success(result_data.get("synthese", "Aucune synthèse disponible."))
 
                 except json.JSONDecodeError:
-                    st.error("Erreur : la réponse de l'IA n'est pas un JSON valide.")
-                    st.text(result)
+                    st.error("❌ Erreur : la réponse n'est pas un JSON valide. Copie brute ci-dessus.")
 
             except Exception as e:
                 st.error(f"Erreur pendant l'analyse IA : {e}")
