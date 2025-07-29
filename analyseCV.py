@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version complète avec présentation simplifiée)
+# Analyse de CV - GFSI (version complète avec comparaison IFS point par point)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -59,20 +59,34 @@ if uploaded_file:
         st.error(f"Erreur lors de la lecture du fichier : {e}")
         st.stop()
 
-    # Construction du prompt
+    # Construction du prompt avec comparaison point par point
     prompt = f"""
-Tu es un expert GFSI. Analyse le CV ci-dessous selon ce référentiel :
+Tu es un expert en conformité IFS.
+Analyse le CV ci-dessous en comparant CHAQUE EXIGENCE du référentiel IFS une par une.
+Pour chaque exigence :
+- indique si elle est ✅ conforme, ⚠️ à challenger (HLNG), ou ❌ non conforme
+- fournis une justification brève (données du CV)
+- indique un score de confiance (0 à 1)
 
+RÉFÉRENTIEL IFS :
 {json.dumps(selected_ref, indent=2)}
 
-Contenu du CV :
+CV DU CANDIDAT :
 {cv_text}
 
-Donne une réponse SIMPLIFIÉE, CLAIRE pour un non-spécialiste, en français. Organise par catégorie avec :
-- ✅ Points forts (conformes),
-- ⚠️ Points à challenger,
-- ❌ Points non conformes
-Ajoute des couleurs et un résumé final pour échanger avec le candidat.
+Format attendu :
+{{
+  "analysis": [
+    {{
+      "exigence": "texte exigence...",
+      "statut": "CONFORME / HLNG / NON CONFORME",
+      "justification": "...",
+      "confiance": 0.85
+    }},
+    ...
+  ],
+  "synthese": "résumé clair à communiquer au candidat"
+}}
 """
 
     if st.button("🔍 Lancer l'analyse IA"):
@@ -85,12 +99,34 @@ Ajoute des couleurs et un résumé final pour échanger avec le candidat.
                 result = response.choices[0].message.content.strip()
                 st.success("✅ Analyse terminée")
 
-                # Présentation simplifiée pour utilisateurs non experts
-                st.markdown("## ✨ Résultat de l'analyse simplifiée")
-                st.markdown(result, unsafe_allow_html=True)
+                try:
+                    result_data = json.loads(result)
+                    st.markdown("## 📊 Résultats par exigence")
+                    for item in result_data.get("analysis", []):
+                        statut = item.get("statut", "")
+                        couleur = {
+                            "CONFORME": "#d4edda",
+                            "HLNG": "#fff3cd",
+                            "NON CONFORME": "#f8d7da"
+                        }.get(statut.upper(), "#e2e3e5")
+                        st.markdown(
+                            f"""
+                            <div style='background-color:{couleur}; padding:15px; border-radius:8px; margin-bottom:10px;'>
+                            <strong>Exigence :</strong> {item['exigence']}<br>
+                            <strong>Statut :</strong> {item['statut']}<br>
+                            <strong>Confiance :</strong> {item['confiance']}<br>
+                            <strong>Justification :</strong> {item['justification']}
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
 
-                filename = f"analyse_{ref_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-                st.download_button("💾 Télécharger le rapport simplifié", result, file_name=filename, mime="text/plain")
+                    st.markdown("## 📝 Synthèse pour le candidat")
+                    st.success(result_data.get("synthese", "Aucune synthèse disponible."))
+
+                except json.JSONDecodeError:
+                    st.error("Erreur : la réponse de l'IA n'est pas un JSON valide.")
+                    st.text(result)
 
             except Exception as e:
                 st.error(f"Erreur pendant l'analyse IA : {e}")
