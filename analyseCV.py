@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version avec vérification JSON et affichage brut)
+# Analyse de CV - GFSI (version avec affichage structuré et jauge de confiance)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -106,16 +106,23 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
                     result_data = json.loads(result)
                     analysis = result_data.get("analysis", [])
 
-                    # Compter les statuts
+                    # Compter les statuts et moyenne confiance
                     conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "CONFORME")
                     challengers = sum(1 for i in analysis if i.get("statut", "").upper() == "À CHALLENGER")
                     non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
+                    score_moyen = round(sum(i.get("confiance", 0) for i in analysis) / len(analysis), 2) if analysis else 0
 
+                    # Affichage tableau + graphique barre
                     st.markdown("## 📊 Répartition des statuts")
-                    st.bar_chart({
+                    df_stats = pd.DataFrame({
                         "Statut": ["✅ Conformes", "⚠️ À challenger", "❌ Non conformes"],
                         "Nombre": [conformes, challengers, non_conformes]
                     })
+                    st.dataframe(df_stats, hide_index=True)
+                    st.bar_chart(df_stats.set_index("Statut"))
+
+                    st.markdown("## 🎯 Score moyen de confiance")
+                    st.metric(label="Fiabilité moyenne des analyses IA", value=f"{score_moyen * 100:.0f}%")
 
                     st.markdown("## 📋 Détail par exigence")
                     for item in analysis:
