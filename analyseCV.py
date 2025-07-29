@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (multi-CV avec comparaison et graphiques enrichis)
+# Analyse de CV - GFSI avec jauges et extraction JSON robuste
 
 import streamlit as st
 import PyPDF2
@@ -8,10 +8,7 @@ from datetime import datetime
 from pathlib import Path
 import groq
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import numpy as np
 
 st.set_page_config(page_title="Analyse de CV GFSI", layout="wide")
 st.title("📄 Analyse comparative de CV - Auditeurs GFSI")
@@ -34,7 +31,19 @@ def afficher_jauge(titre, valeur):
     ))
     st.plotly_chart(fig, use_container_width=True)
 
-# Configuration de la sidebar pour les paramètres
+def extract_valid_json(text):
+    try:
+        # Trouve tous les objets JSON indépendants
+        matches = re.findall(r'\{(?:[^{}]|(?R))*\}', text, re.DOTALL)
+        for m in matches:
+            try:
+                return json.loads(m)
+            except json.JSONDecodeError:
+                continue
+    except Exception as e:
+        st.error(f"Erreur d'extraction JSON : {e}")
+    return None
+
 with st.sidebar:
     st.header("🔧 Configuration")
     api_key = st.text_input("🔑 Clé API Groq :", type="password")
@@ -56,27 +65,19 @@ with st.sidebar:
 
     referentials = load_referentials()
     if not referentials:
-        st.error("Aucun référentiel trouvé dans le dossier 'referentiels'.")
+        st.error("Aucun référentiel trouvé.")
         st.stop()
 
     ref_name = st.selectbox("📚 Référentiel GFSI :", list(referentials.keys()))
     selected_ref = referentials[ref_name]
 
     model = st.selectbox("🧠 Modèle IA :", [
-        "llama3-8b-8192",
-        "llama-3.3-70b-versatile", 
-        "llama-3.1-8b-instant",
-        "kmi-k2-70b",
-        "qwen3-72b"
+        "llama3-8b-8192", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "kmi-k2-70b", "qwen3-72b"
     ])
 
-uploaded_files = st.file_uploader(
-    "📄 Chargez un ou plusieurs CV (PDF uniquement)", 
-    type=["pdf"], 
-    accept_multiple_files=True
-)
+uploaded_files = st.file_uploader("📄 Chargez un ou plusieurs CV (PDF uniquement)", type=["pdf"], accept_multiple_files=True)
 
-if uploaded_files and st.button("🔍 Lancer l'analyse IA", type="primary"):
+if uploaded_files and st.button("🔍 Lancer l'analyse IA"):
     results_all = []
     details_export = []
 
@@ -86,6 +87,7 @@ if uploaded_files and st.button("🔍 Lancer l'analyse IA", type="primary"):
                 uploaded_file.seek(0)
                 reader = PyPDF2.PdfReader(uploaded_file)
                 cv_text = " ".join([page.extract_text() or "" for page in reader.pages])
+
                 prompt = f"""
 Tu es un expert en conformité GFSI.
 Analyse le CV ci-dessous en comparant CHAQUE EXIGENCE du référentiel une par une.
@@ -113,24 +115,29 @@ Répond UNIQUEMENT avec un objet JSON strictement valide :
   "synthese": "résumé clair et actionnable pour le candidat"
 }}
 """
+
                 response = client.chat.completions.create(
                     model=model,
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.1
                 )
+
                 result = response.choices[0].message.content.strip()
-                json_start = result.find('{')
-                json_str = result[json_start:]
-                json_str = re.sub(r'```json|```', '', json_str).strip()
-                result_data = json.loads(json_str)
+                result_data = extract_valid_json(result)
+                if not result_data:
+                    st.error(f"⚠️ JSON invalide pour {uploaded_file.name}")
+                    continue
+
                 analysis = result_data.get("analysis", [])
                 for a in analysis:
                     a["cv"] = uploaded_file.name
                     details_export.append(a)
+
                 conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "CONFORME")
                 challengers = sum(1 for i in analysis if "CHALLENGER" in i.get("statut", "").upper())
                 non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
                 score_moyen = round(sum(i.get("confiance", 0) for i in analysis) / len(analysis), 2) if analysis else 0
+
                 results_all.append({
                     "nom": uploaded_file.name,
                     "conformes": conformes,
@@ -140,14 +147,15 @@ Répond UNIQUEMENT avec un objet JSON strictement valide :
                     "details": analysis,
                     "synthese": result_data.get("synthese", "")
                 })
+
             except Exception as e:
                 st.error(f"❌ Erreur pour {uploaded_file.name} : {e}")
 
+    # Résultats
     for result in results_all:
-        st.header(f"📄 Résultats pour : {result['nom']}")
+        st.subheader(f"📄 Résultats pour {result['nom']}")
         df = pd.DataFrame(result["details"])
 
-        # 🎯 Taux de conformité par exigence (affichage jauge)
         st.markdown("### 🎯 Taux de conformité par exigence")
         grouped = df.groupby("exigence")
         for exigence, group in grouped:
@@ -156,6 +164,5 @@ Répond UNIQUEMENT avec un objet JSON strictement valide :
             taux_conformite = conformes / total if total > 0 else 0
             afficher_jauge(exigence, taux_conformite)
 
-        # Synthèse
         st.markdown("### 🧠 Synthèse IA")
         st.info(result["synthese"])
