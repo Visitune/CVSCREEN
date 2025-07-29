@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "name": "IFS",
+    "version": "Version 7.1",
+    "description": "International Featured Standards for Food",
+    "last_updated": "2025-07-28",
+    "source": "Official IFS Requirements"
+  },
+  "categories": {
+    "General_Requirements": {
+      "weight": 0.20,
+      "description": "General requirements for auditor qualification",
+      "subcategories": {
+        "Education": {
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "IFS-EDU-001",
+              "text": "A food-related or bioscience degree (minimum Bachelor's degree or equivalent) or a successfully completed food-related professional higher education.",
+              "critical": true,
+              "minimum_acceptable": "Bac +3 en domaine alimentaire ou bioscience",
+              "references": ["IFS Section 3.1.1"]
+            }
+          ]
+        },
+        "Work_Experience": {
+          "weight": 0.6,
+          "requirements": [
+            {
+              "id": "IFS-EXP-001",
+              "text": "A minimum of 3 years full-time professional experience in the food industry, including quality assurance, food safety, R&D, or food safety inspection/enforcement.",
+              "critical": true,
+              "minimum_acceptable": "3 ans d'expérience professionnelle à plein temps",
+              "references": ["IFS Section 3.1.1"]
+            },
+            {
+              "id": "IFS-EXP-002",
+              "text": "Consultancy experience may be recognized for up to 1 year, provided it is documented.",
+              "critical": false,
+              "minimum_acceptable": "Expérience de conseil reconnue jusqu'à 1 an",
+              "references": ["IFS Section 3.1.1"]
+            }
+          ]
+        }
+      }
+    },
+    "Qualifications": {
+      "weight": 0.35,
+      "description": "Professional qualifications and certifications",
+      "subcategories": {
+        "Lead_Auditor": {
+          "weight": 0.6,
+          "requirements": [
+            {
+              "id": "IFS-CERT-001",
+              "text": "Completed a recognized Lead Auditor course (e.g., IFS, IRCA) with a duration of at least 40 hours.",
+              "critical": true,
+              "minimum_acceptable": "Formation Lead Auditor reconnue 40h min",
+              "references": ["IFS Section 3.1.2"],
+              "examples": [
+                "IFS Lead Auditor course",
+                "IRCA registered courses"
+              ]
+            },
+            {
+              "id": "IFS-CERT-002",
+              "text": "Completed a Food Hygiene and HACCP course with a duration of at least 2 days/16 hours.",
+              "critical": true,
+              "minimum_acceptable": "Formation Hygiène Alimentaire et HACCP 16h",
+              "references": ["IFS Section 3.1.2"]
+            }
+          ]
+        },
+        "Audit_Experience": {
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "IFS-AUD-001",
+              "text": "Performed a minimum of 7 food safety audits (GFSI recognized food safety certification audits and/or second party audits) in the past 5 years.",
+              "critical": true,
+              "minimum_acceptable": "7 audits de sécurité alimentaire dans les 5 dernières années",
+              "references": ["IFS Section 3.1.2"]
+            },
+            {
+              "id": "IFS-AUD-002",
+              "text": "For candidates with no audit experience, participation in 7 audits is required, including 2 shadowing audits and 5 supervised audits.",
+              "critical": true,
+              "minimum_acceptable": "7 audits avec 2 en observation et 5 supervisés",
+              "references": ["IFS Section 3.1.2"]
+            }
+          ]
+        }
+      }
+    },
+    "Advanced_Requirements": {
+      "weight": 0.45,
+      "description": "Advanced requirements for specialized auditing",
+      "subcategories": {
+        "Product_Scope": {
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "IFS-ADV-001",
+              "text": "One year of professional experience in the food industry in relation to food processing activities for each applied product scope.",
+              "critical": true,
+              "minimum_acceptable": "1 an d'expérience par domaine de produits",
+              "references": ["IFS Section 3.1.3"]
+            },
+            {
+              "id": "IFS-ADV-002",
+              "text": "At least 5 audits per scope, including GFSI recognized or second party audits.",
+              "critical": true,
+              "minimum_acceptable": "5 audits par domaine de produits",
+              "references": ["IFS Section 3.1.3"]
+            }
+          ]
+        },
+        "Technology_Scope": {
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "IFS-ADV-003",
+              "text": "One year of professional experience in the food industry for each applied technology scope.",
+              "critical": true,
+              "minimum_acceptable": "1 an d'expérience par technologie",
+              "references": ["IFS Section 3.1.3"]
+            },
+            {
+              "id": "IFS-ADV-004",
+              "text": "At least 5 audits per scope, including GFSI recognized or second party audits.",
+              "critical": true,
+              "minimum_acceptable": "5 audits par technologie",
+              "references": ["IFS Section 3.1.3"]
+            }
+          ]
+        },
+        "Language": {
+          "weight": 0.2,
+          "requirements": [
+            {
+              "id": "IFS-ADV-005",
+              "text": "Proof of fluency in audit language via CEFR B2 certificate, 2 years work experience, or 10 audits conducted in that language.",
+              "critical": true,
+              "minimum_acceptable": "Maîtrise B2 de la langue d'audit",
+              "references": ["IFS Section 3.1.3"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

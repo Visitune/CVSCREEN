@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "name": "FSSC_22000",
+    "version": "Version 5",
+    "description": "Food Safety System Certification 22000",
+    "last_updated": "2025-07-28",
+    "source": "Official FSSC 22000 Requirements"
+  },
+  "categories": {
+    "Initial_Training_and_Experience": {
+      "weight": 0.30,
+      "description": "Initial training and experience requirements",
+      "subcategories": {
+        "Work_Experience": {
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "FSSC-EXP-001",
+              "text": "The auditor shall have at least 2 years full-time experience in the food or associated industry.",
+              "critical": true,
+              "minimum_acceptable": "2 ans d'expérience à plein temps dans l'industrie alimentaire",
+              "references": ["FSSC 22000 Part II Section 4.1.1"]
+            },
+            {
+              "id": "FSSC-EXP-002",
+              "text": "Consultancy experience may be recognized for up to 6 months, provided it is equivalent to work experience.",
+              "critical": false,
+              "minimum_acceptable": "Expérience de conseil reconnue jusqu'à 6 mois",
+              "references": ["FSSC 22000 Part II Section 4.1.1"]
+            }
+          ]
+        },
+        "Education": {
+          "weight": 0.3,
+          "requirements": [
+            {
+              "id": "FSSC-EDU-001",
+              "text": "A degree in a food-related or bioscience discipline, or completion of a higher education course in a related field.",
+              "critical": true,
+              "minimum_acceptable": "Diplôme dans domaine alimentaire ou bioscience",
+              "references": ["FSSC 22000 Part II Section 4.1.1"]
+            }
+          ]
+        },
+        "Training": {
+          "weight": 0.2,
+          "requirements": [
+            {
+              "id": "FSSC-TRN-001",
+              "text": "Successful completion of a Lead Auditor Course for FSMS or QMS (minimum 40 hours).",
+              "critical": true,
+              "minimum_acceptable": "Formation Lead Auditor FSMS/QMS 40h min",
+              "references": ["FSSC 22000 Part II Section 4.1.1"]
+            },
+            {
+              "id": "FSSC-TRN-002",
+              "text": "Completed HACCP training of at least 16 hours.",
+              "critical": true,
+              "minimum_acceptable": "Formation HACCP 16h minimum",
+              "references": ["FSSC 22000 Part II Section 4.1.1"]
+            }
+          ]
+        }
+      }
+    },
+    "Audit_Experience": {
+      "weight": 0.45,
+      "description": "Audit experience requirements",
+      "subcategories": {
+        "Audit_Requirements": {
+          "weight": 0.8,
+          "requirements": [
+            {
+              "id": "FSSC-AUD-001",
+              "text": "Auditors must have completed at least 10 audit days consisting of 5 third-party certification audits covering FSMS, HACCP, and PRP requirements.",
+              "critical": true,
+              "minimum_acceptable": "10 jours d'audit dont 5 audits certification tierce partie",
+              "references": ["FSSC 22000 Part II Section 4.1.2"]
+            },
+            {
+              "id": "FSSC-AUD-002",
+              "text": "At least 2 audits must be performed under supervision of an FSSC 22000 qualified auditor.",
+              "critical": true,
+              "minimum_acceptable": "2 audits supervisés par auditeur FSSC 22000 qualifié",
+              "references": ["FSSC 22000 Part II Section 4.1.2"]
+            }
+          ]
+        },
+        "Special_Categories": {
+          "weight": 0.2,
+          "requirements": [
+            {
+              "id": "FSSC-AUD-003",
+              "text": "Auditors specializing in packaging must have a primary qualification in packaging technology.",
+              "critical": true,
+              "minimum_acceptable": "Qualification principale en technologie d'emballage",
+              "references": ["FSSC 22000 Part II Section 4.1.2"]
+            },
+            {
+              "id": "FSSC-AUD-004",
+              "text": "Training must cover topics like packaging legislation, standards, and safety control.",
+              "critical": false,
+              "minimum_acceptable": "Formation couvrant législation, standards et contrôle sécurité",
+              "references": ["FSSC 22000 Part II Section 4.1.2"]
+            }
+          ]
+        }
+      }
+    },
+    "Continuing_Education": {
+      "weight": 0.25,
+      "description": "Continuing education and professional development",
+      "subcategories": {
+        "Annual_Requirements": {
+          "weight": 1.0,
+          "requirements": [
+            {
+              "id": "FSSC-CONT-001",
+              "text": "Auditors must complete annual continuing education requirements as specified by the certification body.",
+              "critical": true,
+              "minimum_acceptable": "Formation continue annuelle requise",
+              "references": ["FSSC 22000 Part II Section 4.1.3"]
+            },
+            {
+              "id": "FSSC-CONT-002",
+              "text": "Documentation of all continuing education activities must be maintained.",
+              "critical": true,
+              "minimum_acceptable": "Documentation des activités de formation continue",
+              "references": ["FSSC 22000 Part II Section 4.1.3"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

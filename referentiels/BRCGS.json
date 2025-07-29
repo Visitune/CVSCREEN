@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "name": "BRCGS",
+    "version": "Issue 9",
+    "description": "BRC Global Standard for Food Safety",
+    "last_updated": "2025-07-28",
+    "source": "Official BRCGS Requirements"
+  },
+  "categories": {
+    "Education_and_Certifications": {
+      "weight": 0.25,
+      "description": "Educational and certification requirements for auditors",
+      "subcategories": {
+        "Mandatory_Education": {
+          "weight": 0.6,
+          "requirements": [
+            {
+              "id": "BRC-EDU-001",
+              "text": "The auditor shall have a degree in a food-related, bioscience, or science and engineering discipline.",
+              "critical": true,
+              "minimum_acceptable": "Bac +3 en domaine pertinent",
+              "references": ["BRCGS Section 2.1.1"]
+            }
+          ]
+        },
+        "Professional_Certifications": {
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "BRC-CERT-001",
+              "text": "The auditor shall have completed a recognized lead auditor qualification, including training on quality management systems with a minimum of 40 hours.",
+              "critical": true,
+              "minimum_acceptable": "Formation lead auditor reconnue 40h min",
+              "references": ["BRCGS Section 2.1.2"],
+              "examples": [
+                "IRCA registered courses",
+                "ASQ Certified Quality Auditor",
+                "BRCGS Lead Auditor courses"
+              ]
+            },
+            {
+              "id": "BRC-CERT-002",
+              "text": "The auditor shall have completed a HACCP training course of at least 2 days (16 hours) based on Codex Alimentarius principles.",
+              "critical": true,
+              "minimum_acceptable": "Formation HACCP 16h basée sur Codex",
+              "references": ["BRCGS Section 2.1.2"]
+            },
+            {
+              "id": "BRC-CERT-003",
+              "text": "Auditors shall have successfully completed a Global Standard Food Safety (Issue 9) training course with corresponding examinations.",
+              "critical": true,
+              "minimum_acceptable": "Formation BRCGS Issue 9 avec examen",
+              "references": ["BRCGS Section 2.1.2"]
+            }
+          ]
+        }
+      }
+    },
+    "Professional_Experience": {
+      "weight": 0.40,
+      "description": "Professional experience requirements",
+      "subcategories": {
+        "Minimum_Experience": {
+          "weight": 0.7,
+          "requirements": [
+            {
+              "id": "BRC-EXP-001",
+              "text": "The auditor shall have a minimum of 5 years post-qualification experience related to the food industry.",
+              "critical": true,
+              "minimum_acceptable": "5 ans d'expérience post-qualification",
+              "references": ["BRCGS Section 2.1.1"]
+            }
+          ]
+        },
+        "Relevant_Industry_Experience": {
+          "weight": 0.3,
+          "requirements": [
+            {
+              "id": "BRC-EXP-002",
+              "text": "This experience shall include roles such as quality assurance, food safety, technical management, or risk management functions within manufacturing, retailing, or inspection/enforcement.",
+              "critical": false,
+              "minimum_acceptable": "Expérience en assurance qualité ou sécurité alimentaire",
+              "references": ["BRCGS Section 2.1.1"]
+            }
+          ]
+        }
+      }
+    },
+    "Audit_Specific_Experience": {
+      "weight": 0.35,
+      "description": "Audit-specific experience requirements",
+      "subcategories": {
+        "Audit_Training_Program": {
+          "weight": 0.6,
+          "requirements": [
+            {
+              "id": "BRC-AUD-001",
+              "text": "Certification bodies must develop tailored training programs for each auditor depending on their background.",
+              "critical": false,
+              "minimum_acceptable": "Programme de formation adapté à l'auditeur",
+              "references": ["BRCGS Section 2.1.3"]
+            },
+            {
+              "id": "BRC-AUD-002",
+              "text": "Training shall include product safety, HACCP, prerequisite programs, and relevant laws and regulations.",
+              "critical": true,
+              "minimum_acceptable": "Formation incluant sécurité, HACCP, PRP et réglementation",
+              "references": ["BRCGS Section 2.1.3"]
+            },
+            {
+              "id": "BRC-AUD-003",
+              "text": "Assessment of knowledge and skills for each category is required before certification.",
+              "critical": true,
+              "minimum_acceptable": "Évaluation des connaissances avant certification",
+              "references": ["BRCGS Section 2.1.3"]
+            }
+          ]
+        },
+        "Training_Exceptions": {
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "BRC-AUD-004",
+              "text": "Certification bodies may employ auditors who do not fully meet the specified criteria, provided there is documented justification approved by BRCGS.",
+              "critical": false,
+              "minimum_acceptable": "Justification documentée pour exceptions",
+              "references": ["BRCGS Section 2.1.3"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "name": "TEMPLATE_REFERENTIEL",
+    "version": "1.0",
+    "description": "Template for creating new GFSI referentials",
+    "last_updated": "2025-07-28",
+    "source": "Internal Template"
+  },
+  "categories": {
+    "Category_Name": {
+      "weight": 0.0,
+      "description": "Description of this category",
+      "subcategories": {
+        "Subcategory_Name": {
+          "weight": 0.0,
+          "requirements": [
+            {
+              "id": "REF-CODE-001",
+              "text": "Detailed requirement text here",
+              "critical": true,
+              "minimum_acceptable": "Minimum acceptable criteria",
+              "references": ["Standard Section X.X.X"],
+              "examples": ["Example 1", "Example 2"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
