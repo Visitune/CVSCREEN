@@ -52,9 +52,6 @@ model = st.selectbox("🧠 Choisissez le modèle IA :", [
 # Téléversement du CV
 uploaded_file = st.file_uploader("📄 Chargez un CV (PDF uniquement)", type=["pdf"])
 
-# Téléversement du fichier de coûts
-cout_file = st.file_uploader("📎 Charger le fichier des coûts de formation", type=["xlsx", "csv"])
-
 if uploaded_file:
     try:
         reader = PyPDF2.PdfReader(uploaded_file)
@@ -148,25 +145,24 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
                         )
 
                     st.markdown("## 📝 Synthèse pour le candidat")
-                    st.success(result_data.get("synthese", "Aucune synthèse disponible."))
+                    synthese = result_data.get("synthese", "")
 
-                    # Estimation des coûts
-                    if cout_file and st.button("📐 Estimer les coûts de formation"):
-                        try:
-                            df_couts = pd.read_excel(cout_file) if cout_file.name.endswith(".xlsx") else pd.read_csv(cout_file)
-                            df_filtre = df_couts[df_couts["référentiel"] == ref_name]
-                            cout_interne = int(df_filtre[df_filtre["type_formation"] == "interne"]["coût_par_exigence"].values[0])
-                            cout_externe = int(df_filtre[df_filtre["type_formation"] == "externe"]["coût_par_exigence"].values[0])
-                            nb_formations = challengers + non_conformes
-                            total_interne = nb_formations * cout_interne
-                            total_externe = nb_formations * cout_externe
+                    conformes_list = [i['exigence'] for i in analysis if i.get("statut", "").upper() == "CONFORME"]
+                    challengers_list = [i['exigence'] for i in analysis if i.get("statut", "").upper() == "À CHALLENGER"]
 
-                            st.markdown("## 💸 Estimation des coûts de formation")
-                            st.info(f"Nombre d'exigences à traiter : **{nb_formations}**")
-                            st.success(f"💼 Formation interne estimée : **{total_interne} €**")
-                            st.warning(f"🌐 Formation externe estimée : **{total_externe} €**")
-                        except Exception as e:
-                            st.error(f"Erreur de lecture du fichier de coûts : {e}")
+                    if conformes_list:
+                        st.success("### ✅ Points conformes")
+                        for ex in conformes_list:
+                            st.markdown(f"- {ex}")
+
+                    if challengers_list:
+                        st.warning("### ⚠️ Points à challenger")
+                        for ex in challengers_list:
+                            st.markdown(f"- {ex}")
+
+                    if synthese:
+                        st.markdown("### 🗒️ Synthèse complémentaire IA")
+                        st.info(synthese)
 
                 except json.JSONDecodeError:
                     st.error("❌ Erreur : la réponse n'est pas un JSON valide. Copie brute ci-dessus.")
