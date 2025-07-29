@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version avec visualisation par camembert)
+# Analyse de CV - GFSI (version avec visualisation par camembert sans matplotlib)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import groq
-import matplotlib.pyplot as plt
+import pandas as pd
 
 # Configuration Streamlit
 st.set_page_config(page_title="Analyse de CV GFSI", layout="wide")
@@ -109,14 +109,22 @@ Format attendu :
                     non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
 
                     st.markdown("## 📊 Répartition des statuts")
-                    labels = ['✅ Conformes', '⚠️ À challenger', '❌ Non conformes']
-                    sizes = [conformes, challengers, non_conformes]
-                    colors = ['#28a745', '#ffc107', '#dc3545']
-
-                    fig, ax = plt.subplots()
-                    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
-                    ax.axis('equal')
-                    st.pyplot(fig)
+                    data = pd.DataFrame({
+                        "Statut": ["✅ Conformes", "⚠️ À challenger", "❌ Non conformes"],
+                        "Valeur": [conformes, challengers, non_conformes]
+                    })
+                    st.plotly_chart({
+                        "data": [
+                            {
+                                "values": data["Valeur"].tolist(),
+                                "labels": data["Statut"].tolist(),
+                                "type": "pie",
+                                "marker": {"colors": ["#28a745", "#ffc107", "#dc3545"]},
+                                "textinfo": "label+percent"
+                            }
+                        ],
+                        "layout": {"title": "Analyse visuelle des exigences"}
+                    })
 
                     st.markdown("## 📋 Détail par exigence")
                     for item in analysis:
