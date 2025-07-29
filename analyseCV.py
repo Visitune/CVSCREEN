@@ -1,34 +1,33 @@
+# Analyse de CV - GFSI (version complète avec options avancées)
+# Nom du fichier : analyse_cv_gfsi.py
+
 import streamlit as st
 import PyPDF2
-import pandas as pd
-import os
 import json
-import groq
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+import groq
 
-# Configuration de la page
-st.set_page_config(page_title="Analyse de CV Auditeurs", layout="wide")
+# Configuration Streamlit
+st.set_page_config(page_title="Analyse de CV GFSI", layout="wide")
+st.title("📄 Analyse automatisée de CV - Auditeurs GFSI")
 
-# Titre de l'application
-st.title("📄 Analyse automatisée de CV - Auditeurs de certification")
-
-# Clé API Groq manuelle
-api_key = st.text_input("🔑 Entrez votre clé API Groq :", type="password")
+# Clé API GROQ
+api_key = st.text_input("🔑 Clé API Groq :", type="password")
 if not api_key:
-    st.warning("Merci de renseigner votre clé API Groq pour continuer.")
+    st.warning("Veuillez saisir une clé API valide.")
     st.stop()
 
 client = groq.Client(api_key=api_key)
 
-# Chargement des référentiels depuis le dossier
+# Chargement des référentiels
+@st.cache_data
 def load_referentials():
-    ref_dir = Path("referentiels")
     referentials = {}
-    if ref_dir.exists():
-        for ref_file in ref_dir.glob("*.json"):
-            with open(ref_file, "r", encoding="utf-8") as f:
-                referentials[ref_file.stem] = json.load(f)
+    ref_dir = Path("referentiels")
+    for file in ref_dir.glob("*.json"):
+        with open(file, encoding="utf-8") as f:
+            referentials[file.stem] = json.load(f)
     return referentials
 
 referentials = load_referentials()
@@ -36,52 +35,84 @@ if not referentials:
     st.error("Aucun référentiel trouvé dans le dossier 'referentiels'.")
     st.stop()
 
-ref_choice = st.selectbox("📚 Choisissez un référentiel à utiliser :", list(referentials.keys()))
-selected_ref = referentials[ref_choice]
+# Sélection du référentiel
+ref_name = st.selectbox("📚 Sélectionnez un référentiel GFSI :", list(referentials.keys()))
+selected_ref = referentials[ref_name]
 
-# Upload du CV
-uploaded_file = st.file_uploader("📄 Uploadez un CV (PDF uniquement)", type=["pdf"])
+# Modèle IA
+model = st.selectbox("🧠 Choisissez le modèle IA :", [
+    "llama3-8b-8192",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "kmi-k2-70b",
+    "qwen3-72b"
+])
 
-if uploaded_file is not None:
-    pdf_reader = PyPDF2.PdfReader(uploaded_file)
-    raw_text = ""
-    for page in pdf_reader.pages:
-        raw_text += page.extract_text()
+# Téléversement du CV
+uploaded_file = st.file_uploader("📄 Chargez un CV (PDF uniquement)", type=["pdf"])
 
-    # Construction du prompt pour l'IA
+if uploaded_file:
+    try:
+        reader = PyPDF2.PdfReader(uploaded_file)
+        cv_text = " ".join([page.extract_text() or "" for page in reader.pages])
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture du fichier : {e}")
+        st.stop()
+
+    # Options d'affichage avancées
+    debug = st.checkbox("Afficher les données brutes (debug)")
+
+    # Construction du prompt
     prompt = f"""
-Tu es un assistant de recrutement spécialisé dans les audits de certification.
-Analyse le CV suivant à la lumière des exigences du référentiel suivant :
+Tu es un expert en recrutement GFSI.
+Analyse ce CV à la lumière du référentiel suivant :
 
 {json.dumps(selected_ref, indent=2)}
 
 Voici le contenu du CV :
-"""
-{raw_text}
-"""
+{cv_text}
 
-Retourne un JSON structuré contenant :
-1. Pour chaque exigence : met / non met, score de confiance, commentaire
+Retourne un JSON structuré avec :
+1. Pour chaque exigence : conforme / non conforme / partiellement conforme, score de confiance, justification
 2. Une synthèse globale du profil
-3. Une suggestion de relance si certaines informations sont manquantes
+3. Des recommandations ou relances éventuelles
 """
 
-    with st.spinner("⏳ Analyse du CV en cours..."):
-        try:
-            response = client.chat.completions.create(
-                model="llama3-8b-8192",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            result_text = response.choices[0].message.content.strip()
-            st.success("✅ Analyse terminée avec succès !")
+    if st.button("🔍 Lancer l'analyse IA"):
+        with st.spinner("Analyse du CV en cours..."):
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                result = response.choices[0].message.content.strip()
 
-            # Affichage
-            st.subheader("💾 Résultat JSON")
-            st.code(result_text, language="json")
+                st.success("✅ Analyse terminée")
+                st.subheader("📊 Résultats JSON")
+                st.code(result, language="json")
 
-            # Option de téléchargement
-            filename = f"rapport_{ref_choice}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            st.download_button("📅 Télécharger le rapport JSON", result_text, file_name=filename, mime="application/json")
+                # Téléchargement du rapport
+                filename = f"analyse_{ref_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                st.download_button("💾 Télécharger le rapport JSON", result, file_name=filename, mime="application/json")
 
-        except Exception as e:
-            st.error(f"❌ Erreur pendant l'appel à l'API : {e}")
+            except Exception as e:
+                st.error(f"Erreur pendant l'analyse IA : {e}")
+
+# Administration (mode développeur)
+with st.expander("🔐 Mode administration - Création de référentiels IA"):
+    admin_pwd = st.text_input("Mot de passe admin :", type="password")
+    if admin_pwd == "admin123":  # à sécuriser dans la vraie vie
+        texte = st.text_area("📋 Collez ici les exigences du nouveau référentiel :")
+        if st.button("🤖 Générer référentiel JSON"):
+            prompt_ref = f"Crée un JSON structuré pour ce référentiel GFSI :\n{texte}"
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt_ref}]
+                )
+                json_ref = response.choices[0].message.content.strip()
+                st.code(json_ref, language="json")
+            except Exception as e:
+                st.error(f"Erreur IA : {e}")
+    else:
+        st.info("Mot de passe requis pour accéder à ce module.")
