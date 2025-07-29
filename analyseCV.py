@@ -1,64 +1,87 @@
 import streamlit as st
-import os
-import groq
 import PyPDF2
 import pandas as pd
-from pathlib import Path
+import os
 import json
+import groq
+from pathlib import Path
+from datetime import datetime
 
-st.set_page_config(page_title="Analyse CV Auditeurs", layout="wide")
+# Configuration de la page
+st.set_page_config(page_title="Analyse de CV Auditeurs", layout="wide")
 
-st.title("📄 Analyse automatique de CV – Auditeurs")
+# Titre de l'application
+st.title("📄 Analyse automatisée de CV - Auditeurs de certification")
 
-# --- Étape 1 : Clé API utilisateur ---
-api_key = st.text_input("🔑 Veuillez saisir votre clé API Groq :", type="password")
-
+# Clé API Groq manuelle
+api_key = st.text_input("🔑 Entrez votre clé API Groq :", type="password")
 if not api_key:
-    st.warning("Merci d'entrer une clé API valide pour continuer.")
+    st.warning("Merci de renseigner votre clé API Groq pour continuer.")
     st.stop()
 
 client = groq.Client(api_key=api_key)
 
-# --- Étape 2 : Chargement des référentiels ---
+# Chargement des référentiels depuis le dossier
 def load_referentials():
+    ref_dir = Path("referentiels")
     referentials = {}
-    folder = Path("referentiels")
-    if folder.exists():
-        for file in folder.glob("*.json"):
-            with open(file, "r", encoding="utf-8") as f:
-                referentials[file.stem] = json.load(f)
+    if ref_dir.exists():
+        for ref_file in ref_dir.glob("*.json"):
+            with open(ref_file, "r", encoding="utf-8") as f:
+                referentials[ref_file.stem] = json.load(f)
     return referentials
 
 referentials = load_referentials()
-selected_schema = st.selectbox("📚 Choisissez un référentiel à utiliser :", list(referentials.keys()))
+if not referentials:
+    st.error("Aucun référentiel trouvé dans le dossier 'referentiels'.")
+    st.stop()
 
-# --- Étape 3 : Upload du CV ---
+ref_choice = st.selectbox("📚 Choisissez un référentiel à utiliser :", list(referentials.keys()))
+selected_ref = referentials[ref_choice]
+
+# Upload du CV
 uploaded_file = st.file_uploader("📤 Uploadez un CV (PDF uniquement)", type=["pdf"])
 
-if uploaded_file and selected_schema:
+if uploaded_file:
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
-    text = ""
+    raw_text = ""
     for page in pdf_reader.pages:
-        text += page.extract_text()
+        raw_text += page.extract_text()
 
+    # Construction du prompt pour l'IA
     prompt = f"""
-Tu es un assistant qui vérifie si un CV est conforme aux exigences du référentiel suivant :
-{json.dumps(referentials[selected_schema], indent=2)}
+Tu es un assistant de recrutement spécialisé dans les audits de certification.
+Analyse le CV suivant à la lumière des exigences du référentiel suivant :
 
-Voici le contenu du CV à analyser :
-{text}
+{json.dumps(selected_ref, indent=2)}
 
-Retourne un JSON indiquant pour chaque exigence si elle est remplie ou non, avec un score de confiance, et une synthèse globale du profil.
+Voici le contenu du CV :
+"""
+{raw_text}
 """
 
-    with st.spinner("Analyse en cours avec Groq..."):
+Retourne un JSON structuré contenant :
+1. Pour chaque exigence : met / non met, score de confiance, commentaire
+2. Une synthèse globale du profil
+3. Une suggestion de relance si certaines informations sont manquantes
+"""
+
+    with st.spinner("⏳ Analyse du CV en cours..."):
         try:
             response = client.chat.completions.create(
                 model="llama3-8b-8192",
                 messages=[{"role": "user", "content": prompt}]
             )
-            result = response.choices[0].message.content
-            st.subheader("✅ Résultat de l'analyse")
-            st.code(result, language="json")
+            result_text = response.choices[0].message.content.strip()
+            st.success("✅ Analyse terminée avec succès !")
+
+            # Affichage
+            st.subheader("🧾 Résultat JSON")
+            st.code(result_text, language="json")
+
+            # Option de téléchargement
+            filename = f"rapport_{ref_choice}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            st.download_button("📥 Télécharger le rapport JSON", result_text, file_name=filename, mime="application/json")
+
         except Exception as e:
-            st.error(f"Erreur pendant l'appel à l'API : {e}")
+            st.error(f"❌ Erreur pendant l'appel à l'API : {e}")
