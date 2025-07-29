@@ -100,9 +100,6 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
                 result = response.choices[0].message.content.strip()
                 st.success("✅ Analyse terminée")
 
-                st.markdown("### 🧾 Aperçu brut du résultat IA")
-                st.code(result, language="text")
-
                 try:
                     # Nettoyage du résultat si présence de texte parasite
                     json_start = result.find('{')
