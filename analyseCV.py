@@ -86,31 +86,40 @@ Retourne un JSON structuré avec :
                     messages=[{"role": "user", "content": prompt}]
                 )
                 result = response.choices[0].message.content.strip()
-
                 st.success("✅ Analyse terminée")
                 st.subheader("📊 Résultats JSON")
                 st.code(result, language="json")
 
+                try:
+                    parsed_result = json.loads(result)
+                except json.JSONDecodeError:
+                    st.error("Le résultat de l'IA n'est pas un JSON valide.")
+                    st.stop()
+
                 # Curseurs interactifs par chapitre
-                parsed_result = json.loads(result)
                 chapters = {
                     "General Requirements": 0,
                     "Qualifications": 0,
                     "Advanced Requirements": 0
                 }
                 st.markdown("### 📈 Visualisation par chapitre")
-                for key in chapters:
-                    if key in result:
-                        compliant = result.count(f"{key}: Conforme")
-                        partial = result.count(f"{key}: Partiellement conforme")
-                        non = result.count(f"{key}: Non-conforme")
-                        total = compliant + partial + non
-                        st.markdown(f"#### {key}")
+                for chapter in chapters:
+                    compliant = partial = non_compliant = 0
+                    for item in parsed_result.get("analysis", {}).get(chapter.lower().replace(" ", "_"), []):
+                        status = item.get("status", "").upper()
+                        if status == "CONFORME":
+                            compliant += 1
+                        elif status == "PARTIELLEMENT CONFORME":
+                            partial += 1
+                        elif status == "NON CONFORME":
+                            non_compliant += 1
+                    total = compliant + partial + non_compliant
+                    if total > 0:
+                        st.markdown(f"#### {chapter}")
                         st.slider("✅ Conformes", 0, total, compliant, disabled=True)
                         st.slider("🟡 À challenger", 0, total, partial, disabled=True)
-                        st.slider("❌ Non conformes", 0, total, non, disabled=True)
+                        st.slider("❌ Non conformes", 0, total, non_compliant, disabled=True)
 
-                # Téléchargement du rapport
                 filename = f"analyse_{ref_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
                 st.download_button("💾 Télécharger le rapport JSON", result, file_name=filename, mime="application/json")
 
