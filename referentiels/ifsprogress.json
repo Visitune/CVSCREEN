@@ -1,0 +1,26 @@
+{
+  "formation": {
+    "diplôme": ["universitaire dans le domaine alimentaire ou des sciences de la vie (au minimum une licence ou équivalent)",
+                "diplôme professionnel supérieur dans le domaine alimentaire, complété avec succès"],
+    "exigencesAdditionnelles": []
+  },
+  "expérienceProfessionnelle": {
+    "durée": "au moins deux (2) ans d'expérience professionnelle à temps plein dans l'industrie agroalimentaire",
+    "fonctions": ["assurance qualité", "sécurité des aliments", "recherche et développement (R&D) dans l'industrie ou la grande distribution", "aucuds/évaluations ou inspections en matière de sécurité des aliments"],
+    "conseil": {
+      "maxDurée": 1,
+      "description": "expérience en conseil liée aux activités de production alimentaire"
+    }
+  },
+  "exigencesSupplémentaires": {
+    "formationHygiène": "formation en hygiène alimentaire incluant le système HACCP, basée sur les principes généraux du Codex sur l'hygiène alimentaire",
+    "connaissanceRéglementation": "connaissance de la réglementation locale et, le cas échéant, de la législation du pays de destination",
+    "connaissanceApprocheRisque": "connaissance détaillée de l'approche basée sur les risques pour les produits et les procédés",
+    "connaissanceLangue": "connaissance de la langue locale ou prouver qu'il parle couramment une langue autre que sa langue maternelle",
+    "formationEvaluateur": "suivi avec succès la formation d'évaluateur IFS Progress Food",
+    "expérienceEvaluations": {
+      "min": 2,
+      "description": "participation à au moins deux (2) évaluations IFS Progress Food ou à des évaluations/audits de sécurité des aliments de seconde ou tierce partie, en tant qu'observateur ou stagiaire"
+    }
+  }
+}
