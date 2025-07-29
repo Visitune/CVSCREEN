@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version complète avec comparaison IFS point par point)
+# Analyse de CV - GFSI (version avec visualisation par jauges)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import groq
+import plotly.graph_objects as go
 
 # Configuration Streamlit
 st.set_page_config(page_title="Analyse de CV GFSI", layout="wide")
@@ -64,7 +65,7 @@ if uploaded_file:
 Tu es un expert en conformité IFS.
 Analyse le CV ci-dessous en comparant CHAQUE EXIGENCE du référentiel IFS une par une.
 Pour chaque exigence :
-- indique si elle est ✅ conforme, ⚠️ à challenger (HLNG), ou ❌ non conforme
+- indique si elle est ✅ CONFORME, ⚠️ À CHALLENGER, ou ❌ NON CONFORME
 - fournis une justification brève (données du CV)
 - indique un score de confiance (0 à 1)
 
@@ -79,11 +80,10 @@ Format attendu :
   "analysis": [
     {{
       "exigence": "texte exigence...",
-      "statut": "CONFORME / HLNG / NON CONFORME",
+      "statut": "CONFORME / À CHALLENGER / NON CONFORME",
       "justification": "...",
       "confiance": 0.85
-    }},
-    ...
+    }}
   ],
   "synthese": "résumé clair à communiquer au candidat"
 }}
@@ -101,12 +101,38 @@ Format attendu :
 
                 try:
                     result_data = json.loads(result)
-                    st.markdown("## 📊 Résultats par exigence")
-                    for item in result_data.get("analysis", []):
+                    analysis = result_data.get("analysis", [])
+
+                    # Compter les statuts
+                    conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "CONFORME")
+                    challengers = sum(1 for i in analysis if i.get("statut", "").upper() == "À CHALLENGER")
+                    non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
+                    total = len(analysis)
+
+                    st.markdown("## 📊 Résumé visuel")
+                    fig = go.Figure(go.Indicator(
+                        mode="gauge+number+delta",
+                        value=conformes,
+                        domain={'x': [0, 1], 'y': [0, 1]},
+                        title={'text': "Nombre d'exigences conformes"},
+                        delta={'reference': total, 'increasing': {'color': "green"}},
+                        gauge={
+                            'axis': {'range': [0, total]},
+                            'bar': {'color': "green"},
+                            'steps': [
+                                {'range': [0, challengers], 'color': "#ffe08c"},
+                                {'range': [challengers, challengers + non_conformes], 'color': "#f08080"}
+                            ],
+                        }
+                    ))
+                    st.plotly_chart(fig)
+
+                    st.markdown("## 📋 Détail par exigence")
+                    for item in analysis:
                         statut = item.get("statut", "")
                         couleur = {
                             "CONFORME": "#d4edda",
-                            "HLNG": "#fff3cd",
+                            "À CHALLENGER": "#fff3cd",
                             "NON CONFORME": "#f8d7da"
                         }.get(statut.upper(), "#e2e3e5")
                         st.markdown(
