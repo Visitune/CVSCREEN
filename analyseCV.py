@@ -48,9 +48,11 @@ uploaded_files = st.file_uploader("📄 Chargez un ou plusieurs CV (PDF uniqueme
 
 if uploaded_files and st.button("🔍 Lancer l'analyse IA"):
     results_all = []
+    details_export = []
     with st.spinner("Analyse des CV en cours..."):
         for uploaded_file in uploaded_files:
             try:
+                uploaded_file.seek(0)
                 reader = PyPDF2.PdfReader(uploaded_file)
                 cv_text = " ".join([page.extract_text() or "" for page in reader.pages])
                 prompt = f"""
@@ -90,6 +92,9 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
                 json_str = re.sub(r'```json|```', '', json_str).strip()
                 result_data = json.loads(json_str)
                 analysis = result_data.get("analysis", [])
+                for a in analysis:
+                    a["cv"] = uploaded_file.name
+                    details_export.append(a)
                 conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "CONFORME")
                 challengers = sum(1 for i in analysis if i.get("statut", "").upper() == "À CHALLENGER")
                 non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
@@ -116,6 +121,22 @@ Tu dois répondre UNIQUEMENT avec un objet JSON strictement valide, sans texte a
             "🎯 Score confiance": round(r["score"] * 100)
         } for r in results_all])
         st.dataframe(df_compare, hide_index=True)
+
+        csv_data = df_compare.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Télécharger le comparatif CSV",
+            data=csv_data,
+            file_name="comparatif_cv_gfsi.csv",
+            mime="text/csv"
+        )
+
+        df_details = pd.DataFrame(details_export)
+        st.download_button(
+            label="📄 Télécharger les analyses détaillées",
+            data=df_details.to_csv(index=False).encode('utf-8'),
+            file_name="details_analyse_cv_gfsi.csv",
+            mime="text/csv"
+        )
 
         for r in results_all:
             st.markdown(f"## 📋 Détail pour {r['nom']}")
