@@ -1,4 +1,4 @@
-# Analyse de CV - GFSI (version avec visualisation par jauges)
+# Analyse de CV - GFSI (version avec visualisation par camembert)
 # Nom du fichier : analyse_cv_gfsi.py
 
 import streamlit as st
@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import groq
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 # Configuration Streamlit
 st.set_page_config(page_title="Analyse de CV GFSI", layout="wide")
@@ -107,25 +107,16 @@ Format attendu :
                     conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "CONFORME")
                     challengers = sum(1 for i in analysis if i.get("statut", "").upper() == "À CHALLENGER")
                     non_conformes = sum(1 for i in analysis if i.get("statut", "").upper() == "NON CONFORME")
-                    total = len(analysis)
 
-                    st.markdown("## 📊 Résumé visuel")
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number+delta",
-                        value=conformes,
-                        domain={'x': [0, 1], 'y': [0, 1]},
-                        title={'text': "Nombre d'exigences conformes"},
-                        delta={'reference': total, 'increasing': {'color': "green"}},
-                        gauge={
-                            'axis': {'range': [0, total]},
-                            'bar': {'color': "green"},
-                            'steps': [
-                                {'range': [0, challengers], 'color': "#ffe08c"},
-                                {'range': [challengers, challengers + non_conformes], 'color': "#f08080"}
-                            ],
-                        }
-                    ))
-                    st.plotly_chart(fig)
+                    st.markdown("## 📊 Répartition des statuts")
+                    labels = ['✅ Conformes', '⚠️ À challenger', '❌ Non conformes']
+                    sizes = [conformes, challengers, non_conformes]
+                    colors = ['#28a745', '#ffc107', '#dc3545']
+
+                    fig, ax = plt.subplots()
+                    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
+                    ax.axis('equal')
+                    st.pyplot(fig)
 
                     st.markdown("## 📋 Détail par exigence")
                     for item in analysis:
