@@ -1456,3 +1456,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Ensure Groq client is initialized with user-provided key
+groq_client = groq.Client(api_key=api_key)
