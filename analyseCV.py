@@ -91,6 +91,25 @@ Retourne un JSON structuré avec :
                 st.subheader("📊 Résultats JSON")
                 st.code(result, language="json")
 
+                # Curseurs interactifs par chapitre
+                parsed_result = json.loads(result)
+                chapters = {
+                    "General Requirements": 0,
+                    "Qualifications": 0,
+                    "Advanced Requirements": 0
+                }
+                st.markdown("### 📈 Visualisation par chapitre")
+                for key in chapters:
+                    if key in result:
+                        compliant = result.count(f"{key}: Conforme")
+                        partial = result.count(f"{key}: Partiellement conforme")
+                        non = result.count(f"{key}: Non-conforme")
+                        total = compliant + partial + non
+                        st.markdown(f"#### {key}")
+                        st.slider("✅ Conformes", 0, total, compliant, disabled=True)
+                        st.slider("🟡 À challenger", 0, total, partial, disabled=True)
+                        st.slider("❌ Non conformes", 0, total, non, disabled=True)
+
                 # Téléchargement du rapport
                 filename = f"analyse_{ref_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
                 st.download_button("💾 Télécharger le rapport JSON", result, file_name=filename, mime="application/json")
