@@ -40,9 +40,9 @@ ref_choice = st.selectbox("📚 Choisissez un référentiel à utiliser :", list
 selected_ref = referentials[ref_choice]
 
 # Upload du CV
-uploaded_file = st.file_uploader("📤 Uploadez un CV (PDF uniquement)", type=["pdf"])
+uploaded_file = st.file_uploader("📄 Uploadez un CV (PDF uniquement)", type=["pdf"])
 
-if uploaded_file:
+if uploaded_file is not None:
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     raw_text = ""
     for page in pdf_reader.pages:
@@ -76,12 +76,12 @@ Retourne un JSON structuré contenant :
             st.success("✅ Analyse terminée avec succès !")
 
             # Affichage
-            st.subheader("🧾 Résultat JSON")
+            st.subheader("💾 Résultat JSON")
             st.code(result_text, language="json")
 
             # Option de téléchargement
             filename = f"rapport_{ref_choice}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            st.download_button("📥 Télécharger le rapport JSON", result_text, file_name=filename, mime="application/json")
+            st.download_button("📅 Télécharger le rapport JSON", result_text, file_name=filename, mime="application/json")
 
         except Exception as e:
             st.error(f"❌ Erreur pendant l'appel à l'API : {e}")
