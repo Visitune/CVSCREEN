@@ -8,10 +8,18 @@ import pandas as pd
 import plotly.graph_objects as go
 import hashlib
 import io
+import os
 
+# ============== Sécurité / Admin ==============
+def is_admin_authenticated(password: str) -> bool:
+    expected = st.secrets.get("ADMIN_PASSWORD", os.environ.get("ADMIN_PASSWORD", ""))
+    return bool(expected) and password == expected
+
+# ============== Config Streamlit ==============
 st.set_page_config(page_title="Analyse de CV GFSI", layout="wide")
 st.title("📄 Analyse comparative de CV - Auditeurs GFSI")
 
+# ============== Utils ==============
 def jauge(titre, valeur):
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -78,45 +86,36 @@ def validate_analysis(obj):
         obj["synthese"] = ""
     return True, obj
 
-def create_example_referential():
-    return {
-        "metadata": {"name": "GFSI - Auditeur Senior", "version": "1.0", "description": "Référentiel pour auditeurs seniors GFSI", "date_creation": "2024-01-01"},
-        "categories": {
-            "formation": {"name": "Formation et Certification", "weight": 0.3, "description": "Formations académiques et certifications professionnelles"},
-            "experience": {"name": "Expérience Professionnelle", "weight": 0.4, "description": "Expérience pratique en audit et sécurité alimentaire"},
-            "competences": {"name": "Compétences Techniques", "weight": 0.2, "description": "Maîtrise des standards et outils d'audit"},
-            "langues": {"name": "Compétences Linguistiques", "weight": 0.1, "description": "Capacités de communication internationale"}
-        },
-        "exigences": {
-            "FORM_001": {"id": "FORM_001", "category": "formation", "title": "Formation supérieure en sécurité alimentaire", "description": "Diplôme Bac+5 minimum en sciences alimentaires, microbiologie, ou équivalent", "criteres": ["Diplôme universitaire niveau Master (Bac+5) minimum", "Spécialisation en sécurité alimentaire, microbiologie, ou domaine connexe", "Formation continue en normes GFSI"], "exemples_conformes": ["Master en Sciences Alimentaires - Université de Lyon", "Ingénieur Agronome spécialité Sécurité Alimentaire - AgroParisTech", "PhD en Microbiologie Alimentaire + formations GFSI"], "exemples_non_conformes": ["BTS Agroalimentaire uniquement", "Licence en biologie sans spécialisation", "Formation courte en audit sans diplôme supérieur"], "niveau_requis": "obligatoire", "ponderation": 1.0}
-        }
-    }
+@st.cache_data
+def pdf_to_text(file_bytes):
+    reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
+    return " ".join([(page.extract_text() or "") for page in reader.pages])
 
+def file_digest(uploaded_file):
+    uploaded_file.seek(0)
+    data = uploaded_file.read()
+    uploaded_file.seek(0)
+    return hashlib.sha256(data).hexdigest(), data
+
+# ============== Sidebar ==============
 with st.sidebar:
     st.header("🔧 Configuration")
     api_key = st.text_input("🔑 Clé API Groq :", type="password")
-    if st.button("📝 Créer un référentiel d'exemple"):
-        ref_dir = Path("referentiels")
-        ref_dir.mkdir(exist_ok=True)
-        with open(ref_dir / "exemple_auditeur_senior.json", "w", encoding="utf-8") as f:
-            json.dump(create_example_referential(), f, indent=2, ensure_ascii=False)
-        st.success("✅ Référentiel d'exemple créé dans /referentiels/")
-    if not api_key:
-        st.warning("Veuillez saisir une clé API valide.")
-        st.stop()
-    client = groq.Client(api_key=api_key)
 
-with st.sidebar:
-    st.header("🔒 Administration")
+    # Section admin
+    st.divider()
+    st.subheader("🔒 Administration")
     admin_pass = st.text_input("Mot de passe admin :", type="password")
     if is_admin_authenticated(admin_pass):
         st.success("Accès admin validé ✅")
-        if st.button("Créer un référentiel via IA"):
-            # Appeler create_referential_with_ai(...)
-            ...
     else:
-        st.info("Entrez le mot de passe admin pour accéder aux fonctions avancées.")
+        st.caption("Saisissez le mot de passe admin pour accéder aux fonctions sensibles.")
 
+    if not api_key:
+        st.warning("Veuillez saisir une clé API valide.")
+        st.stop()
+
+    client = groq.Client(api_key=api_key)
 
     @st.cache_data
     def load_referentials():
@@ -148,17 +147,7 @@ with st.sidebar:
 
     model = st.selectbox("🧠 Modèle IA :", ["llama3-8b-8192", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
 
-@st.cache_data
-def pdf_to_text(file_bytes):
-    reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
-    return " ".join([(page.extract_text() or "") for page in reader.pages])
-
-def file_digest(uploaded_file):
-    uploaded_file.seek(0)
-    data = uploaded_file.read()
-    uploaded_file.seek(0)
-    return hashlib.sha256(data).hexdigest(), data
-
+# ============== Prompt builder ==============
 def build_prompt(selected_ref, cv_text):
     lines = []
     for req_id, req in selected_ref.get("exigences", {}).items():
@@ -194,6 +183,7 @@ CV:
 {cv_text}
 """
 
+# ============== Main workflow ==============
 uploaded_files = st.file_uploader("📄 Chargez un ou plusieurs CV (PDF uniquement)", type=["pdf"], accept_multiple_files=True)
 
 if uploaded_files and st.button("🔍 Lancer l'analyse IA"):
