@@ -209,7 +209,10 @@ with st.sidebar:
 
     referentials = load_referentials()
     if not referentials:
-        st.error("Aucun référentiel valide trouvé. Créez d'abord un référentiel d'exemple.")
+        st.error("Aucun référentiel valide trouvé.")
+        st.info("💡 **Solutions :**")
+        st.info("• Cliquez sur '📝 Créer un référentiel d'exemple' pour commencer")  
+        st.info("• Si vous avez des anciens référentiels, utilisez '🔄 Migrer anciens référentiels'")
         st.stop()
 
     ref_name = st.selectbox("📚 Référentiel GFSI :", list(referentials.keys()))
