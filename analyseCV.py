@@ -172,7 +172,7 @@ with st.sidebar:
         st.info(f"**{md.get('name', 'Sans nom')}**\n\n{md.get('description', '')}")
         st.caption(f"Version: {md.get('version', 'N/A')} | Date: {md.get('date_creation', md.get('last_updated', 'N/A'))}")
 
-    model = st.selectbox("🧠 Modèle IA :", ["llama3-8b-8192", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
+    model = st.selectbox("🧠 Modèle IA :", ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "meta-llama/llama-4-maverick-17b-128e-instruct", "moonshotai/kimi-k2-instruct-0905"])
 
 # ============== Fonctions IA Admin ==============
 def create_referential_with_ai(exigences_text: str, groq_client) -> dict | None:
