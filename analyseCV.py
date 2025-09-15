@@ -106,6 +106,18 @@ with st.sidebar:
         st.stop()
     client = groq.Client(api_key=api_key)
 
+with st.sidebar:
+    st.header("🔒 Administration")
+    admin_pass = st.text_input("Mot de passe admin :", type="password")
+    if is_admin_authenticated(admin_pass):
+        st.success("Accès admin validé ✅")
+        if st.button("Créer un référentiel via IA"):
+            # Appeler create_referential_with_ai(...)
+            ...
+    else:
+        st.info("Entrez le mot de passe admin pour accéder aux fonctions avancées.")
+
+
     @st.cache_data
     def load_referentials():
         out = {}
