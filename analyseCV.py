@@ -69,7 +69,7 @@ with st.sidebar:
     selected_ref = referentials[ref_name]
 
     model = st.selectbox("🧠 Modèle IA :", [
-        "llama3-8b-8192", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "kmi-k2-70b", "qwen3-72b"
+        "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.3-70b-versatile", "openai/gpt-oss-120b", "moonshotai/kimi-k2-instruct-0905", "qwen3-72b"
     ])
 
 # Fichiers PDF
