@@ -12,7 +12,7 @@ def load_referentials_from_json():
     """
     # Structure améliorée des référentiels (pour compatibilité)
     referentials = {
-        "BRCGS": {
+        "BRCGS_auditeur": {
             "Education_and_Experience": {
                 "requirements": [
                     "The auditor shall have a degree in a food-related, bioscience, or science and engineering discipline.",
@@ -254,3 +254,4 @@ TEMPLATE_NOUVEAU_REFERENTIEL = {
         }
     }
 }
+
