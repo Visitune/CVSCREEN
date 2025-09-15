@@ -507,7 +507,7 @@ with st.sidebar:
         st.info(meta_line)
         st.caption(f"{tr('meta_version', lang)}: {md.get('version','N/A')} | {tr('meta_date', lang)}: {md.get('date_creation', md.get('last_updated','N/A'))}")
 
-    model = st.selectbox(tr("model", lang), ["llama3-8b-8192", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
+    model = st.selectbox(tr("model", lang), ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "meta-llama/llama-4-maverick-17b-128e-instruct", "moonshotai/kimi-k2-instruct-0905"])
 
 # ===================== Main: Upload & Analyse =====================
 uploaded_files = st.file_uploader(tr("uploader", lang), type=["pdf"], accept_multiple_files=True)
